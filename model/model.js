@@ -10,8 +10,9 @@ const Enveloppe = sequelize.define('Enveloppe', {
 		primaryKey: true
 	},
 	name: DataTypes.STRING,
-	amount: DataTypes.FLOAT,
-	parent: DataTypes.INTEGER
+	operationAmount: DataTypes.FLOAT,
+	parent: DataTypes.INTEGER,
+	initialAmount: DataTypes.FLOAT
 });
 
 const Operation = sequelize.define('Operation', {
@@ -23,12 +24,11 @@ const Operation = sequelize.define('Operation', {
 	name: DataTypes.STRING,
 	description: DataTypes.STRING,
 	amount: DataTypes.FLOAT,
-	spendDate: DataTypes.DATE
+	spendDate: DataTypes.DATE,
+	enveloppeId: DataTypes.INTEGER
 });
 
-Enveloppe.hasMany(Operation);
-
-sequelize.sync({ alter: true });
+sequelize.sync({ force: true });
 
 module.exports = {
 	Enveloppe,

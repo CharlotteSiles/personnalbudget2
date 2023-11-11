@@ -1,19 +1,14 @@
 const express = require('express');
 const operationsRouter = express.Router();
+const { operations } = require('../model/operations');
 
-operationsRouter.get('/', (req, res) => {
-	// Send all operations
-});
 
-operationsRouter.post('/', (req, res) => {
-	// Create new operation
-});
 
-operationsRouter.put('/:operationId', (req, res) => {
+operationsRouter.put('/:operationId', async (req, res) => {
 	// Modify one existing operation
 });
 
-operationsRouter.delete('/:operationId', (req, res) => {
+operationsRouter.delete('/:operationId', async (req, res) => {
 	// Delete one operation
 });
 
