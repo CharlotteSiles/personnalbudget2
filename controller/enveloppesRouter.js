@@ -2,9 +2,9 @@ const express = require('express');
 const enveloppesRouter = express.Router();
 const { enveloppes } = require('../model/enveloppes')
 
-enveloppesRouter.get('/', (req, res) => {
+enveloppesRouter.get('/', async (req, res) => {
 	
-	const allEnveloppes = enveloppes.getAllEnveloppes()
+	const allEnveloppes = await enveloppes.getAllEnveloppes()
 	const responseJSON = { enveloppes: [] }
 
 	for (let i = 0; i < allEnveloppes.length; i++) {
@@ -19,34 +19,36 @@ enveloppesRouter.get('/', (req, res) => {
 	res.status(200).send(JSON.stringify(responseJSON))
 });
 
-enveloppesRouter.post('/', (req, res) => {
-	const createdEnveloppe = enveloppes.createEnveloppe(req.body)
+enveloppesRouter.post('/', async (req, res) => {
+	const { name, amount } = req.body
+	const createdEnveloppe = await enveloppes.createEnveloppe({ name: name, amount: amount });
 	if (createdEnveloppe) {
-		res.status(201).send(JSON.stringify(createdEnveloppe));
+		res.status(201).send(JSON.stringify({ id: createdEnveloppe.id, name: createdEnveloppe.name, amount: createdEnveloppe.amount}));
 	} else {
 		res.status(400).send('Bad request. You need to send JSON { "name": "stringName", "amount": "numberAmount" }');
 	}
 });
 
-enveloppesRouter.get('/:enveloppeId', (req, res) => {
-	const enveloppeId = req.params.enveloppeId;
+enveloppesRouter.get('/:enveloppeId', async (req, res) => {
+	const enveloppeId = Number(req.params.enveloppeId);
 
-	if (typeof enveloppeId === 'number' && enveloppeId < 0) {
-		const oneEnveloppe = enveloppes.getEnvloppeById(enveloppeId);
-
-		res.status(200).send(JSON.stringify(oneEnveloppe));
+	if (Number.isInteger(enveloppeId) && enveloppeId > 0) {
+		const oneEnveloppe = await enveloppes.getEnveloppeById(enveloppeId);
+		
+		res.status(200).send(JSON.stringify({ id: oneEnveloppe.id, name: oneEnveloppe.name, amount: oneEnveloppe.amount }));
 	} else {
 		res.status(400).send('Bad request. The enveloppe id have to be a number greater than 0 in request url : \'/enveloppes/enveloppeId\'');
 	}
 });
 
-enveloppesRouter.put('/:enveloppeId', (req, res) => {
-	const enveloppeId = req.params.enveloppeId;
+enveloppesRouter.put('/:enveloppeId', async (req, res) => {
+	const enveloppeId = Number(req.params.enveloppeId);
 
-	if (typeof enveloppeId === 'number' && enveloppeId < 0) {
-		const updatedEnveloppe = enveloppes.updateEnveloppe(enveloppeId, req.body)
+	if (Number.isInteger(enveloppeId) && enveloppeId > 0) {
+		const { name, amount, parent } = req.body
+		const updatedEnveloppe = await enveloppes.updateEnveloppe(enveloppeId, { name: name, amount: amount, parent: parent })
 		if (updatedEnveloppe) {
-			res.status(201).send(JSON.stringify(updatedEnveloppe));
+			res.status(201).send(JSON.stringify({ id: updatedEnveloppe.id, name: updatedEnveloppe.name, amount: updatedEnveloppe.amount }));
 		} else {
 			res.status(400).send('Bad request. You need to send JSON { "name": "stringName", "amount": "numberAmount" }');
 		}

@@ -6,7 +6,8 @@ const enveloppes = {
 	},
 
 	async getEnveloppeById(enveloppeId) {
-		return await Enveloppe.findOne({ where: { id: enveloppeId } });
+		const enveloppe = await Enveloppe.findOne({ where: { id: enveloppeId } });
+		return enveloppe;
 	},
 
 	async createEnveloppe(enveloppe) {
@@ -28,12 +29,15 @@ const enveloppes = {
 		if (enveloppeToUpdate) {
 			if (enveloppe.name && enveloppe.amount) {
 				if (typeof enveloppe.name === 'string' && typeof enveloppe.amount === 'number') {
-					enveloppeToUpdate.name = enveloppe.name;
-					enveloppeToUpdate.amount = enveloppe.amount;
-
-					enveloppeToUpdate.save();
-
-					return enveloppeToUpdate;
+					
+					await Enveloppe.update({ name: enveloppe.name, amount: enveloppe.amount, parent: enveloppe.parent }, { where: { id: enveloppeId } })
+					
+					return { 
+						id: enveloppeId, 
+						name: enveloppe.name, 
+						amount: enveloppe.amount, 
+						parent: enveloppe.parent
+					};
 				}
 			}
 		}
