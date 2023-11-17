@@ -1,8 +1,8 @@
 # To do
-- input validations
 - full operations code
 
 # Finished
+- input validation
 - enveloppes CRUD
 - parent enveloppe system
 - database models

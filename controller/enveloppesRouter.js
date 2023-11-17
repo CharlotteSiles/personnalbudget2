@@ -77,7 +77,6 @@ enveloppesRouter.delete('/:enveloppeId', async (req, res) => {
 	}
 });
 
-// to review : 
 enveloppesRouter.get('/:enveloppeId/operations', async (req, res) => {
 	const enveloppeId = dataValidation.validId(req.params.enveloppeId);
 	
@@ -88,8 +87,20 @@ enveloppesRouter.get('/:enveloppeId/operations', async (req, res) => {
 		const responseJSON = { 
 			id: oneEnveloppe.id, 
 			name: oneEnveloppe.name, 
-			amount: oneEnveloppe.amount,
-			operations: {}
+			initialAmount: oneEnveloppe.initialAmount,
+			operationsAmount: oneEnveloppe.operationAmount,
+			childAmount: oneEnveloppe.childAmount,
+			operations: []
+		}
+
+		for(let op = 0; op < enveloppeOperations.length; op++) {
+			responseJSON.operations[op] = {
+				id: enveloppeOperations[op].id,
+				name: enveloppeOperations[op].name,
+				description: enveloppeOperations[op].description,
+				amount: enveloppeOperations[op].amount,
+				spendDate: enveloppeOperations[op].spendDate
+			}
 		}
 		
 		res.status(200).send(JSON.stringify(responseJSON));
@@ -104,12 +115,14 @@ enveloppesRouter.post('/:enveloppeId/operations', async (req, res) => {
 	name = dataValidation.validName(name)
 	description = dataValidation.validDescription(description)
 	amount = dataValidation.validInitialAmount(amount)
+	console.log(typeof spendDate)
 	spendDate = dataValidation.validSpendDate(spendDate)
 	
 	const enveloppeId = dataValidation.validId(req.params.enveloppeId);
 	
 	if (!enveloppeId || !name || !description || !amount || !spendDate) {
 		res.status(400).send('Bad request')
+		return;
 	}
 	
 	const newOperation = await operations.createOperation({
@@ -126,7 +139,7 @@ enveloppesRouter.post('/:enveloppeId/operations', async (req, res) => {
 		name: newOperation.name,
 		description: newOperation.description,
 		amount: newOperation.amount,
-		spendDate: newOperation.spendDate.toString()
+		spendDate: newOperation.spendDate
 	}))
 });
 
