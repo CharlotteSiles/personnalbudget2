@@ -1,7 +1,7 @@
 const { Sequelize, DataTypes, Model } = require('sequelize');
 const { config } = require('../config')
 
-const sequelize = new Sequelize(`postgres://${config.db.username}:${config.db.password}@${config.db.server}:${config.db.port}/${config.db.dbName}`)
+const sequelize = new Sequelize(process.env.dbInfos)
 
 const Enveloppe = sequelize.define('Enveloppe', {
 	id: {
