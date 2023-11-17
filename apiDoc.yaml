@@ -26,12 +26,14 @@ paths:
                         name: Main
                         initialAmount: 1000
                         parent: null
-                        operationAmount: 300
+                        operationAmount: 0
+                        childAmount: 300
                       - id: 2
                         name: Hobbies
                         initialAmount: 300
                         parent: 1
                         operationAnmount: 42
+                        childAmount: 0
         '500':
           description: Internal server Error
       tags:
@@ -59,6 +61,7 @@ paths:
                       initialAmount: 1000
                       parent: 0
                       operatienAmount: 0
+                      childAmount: 0
         '404':
           description: Enveloppe not found
         '500':
@@ -91,8 +94,9 @@ paths:
                       id: 1
                       name: Main
                       initialAmount: 1000
-                      parent: null
+                      parent: 0
                       operationAmount: 0
+                      childAmount: 0
         '404':
           description: Enveloppe not found
         '500':
@@ -129,6 +133,7 @@ paths:
                       initialAmount: 1000
                       parent: 2
                       operationAmount: 0
+                      childAmount: 0
         '404':
           description: Enveloppe not found
         '500':
@@ -183,6 +188,7 @@ paths:
                       initialAmount: 300
                       parent: 1
                       operationAmount: 60
+                      childAmount: 0
                       operations:
                         - id: 1
                           name: books
@@ -231,6 +237,7 @@ paths:
                         initialAmount: 300
                         parent: 1
                         operationAmount: 60
+                        childAmount: 0
                         operations:
                           - id: 1
                             name: books
@@ -285,6 +292,7 @@ paths:
                       initialAmount: 300
                       parent: 1
                       operationAmount: 60
+                      childAmount: 0
                       operations:
                         - id: 1
                           name: books
