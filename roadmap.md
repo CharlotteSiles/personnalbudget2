@@ -1,7 +1,8 @@
 # To do
-- full operations code
+
 
 # Finished
+- full operations code
 - input validation
 - enveloppes CRUD
 - parent enveloppe system
