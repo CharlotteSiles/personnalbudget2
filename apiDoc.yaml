@@ -1,0 +1,351 @@
+openapi: 3.0.1
+info:
+  title: Personnal Budget 2
+  version: 1.5.0
+  description: >-
+    Version 2 of the personnal budget app created for codecademy back-end
+    lessons
+paths:
+  /enveloppes:
+    summary: Get all budget enveloppes
+    description: The defult path to view all budget enveloppes
+    get:
+      summary: Get all the enveloppes
+      description: Use this to view all the budgets
+      operationId: get_all_enveloppes
+      responses:
+        '200':
+          description: Retrieve all the enveloppes
+          content:
+            application/json:
+              examples:
+                Success:
+                  value:
+                    enveloppes:
+                      - id: 1
+                        name: Main
+                        initialAmount: 1000
+                        parent: null
+                        operationAmount: 300
+                      - id: 2
+                        name: Hobbies
+                        initialAmount: 300
+                        parent: 1
+                        operationAnmount: 42
+        '500':
+          description: Internal server Error
+      tags:
+        - View all
+    post:
+      summary: Create new enveloppe
+      description: Create new enveloppe
+      operationId: post_new_enveloppe
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/enveloppe'
+      responses:
+        '201':
+          description: successfully created enveloppe
+          content:
+            application/json:
+              examples:
+                Success:
+                  value:
+                    enveloppes:
+                      id: 1
+                      name: name
+                      initialAmount: 1000
+                      parent: 0
+                      operatienAmount: 0
+        '404':
+          description: Enveloppe not found
+        '500':
+          description: Internal server Error
+      tags:
+        - One enveloppe operation
+  /eveloppes/{enveloppeId}:
+    summary: Get one enveloppe
+    description: get enveloppe based on their ID
+    get:
+      summary: Get one enveloppe
+      description: Get enveloppe with the corresponding ID
+      operationId: get_one_enveloppe
+      parameters:
+        - in: path
+          name: enveloppeId
+          schema:
+            type: integer
+          required: true
+          description: Numeric value of an enveloppe ID
+      responses:
+        '200':
+          description: Retrieve the ID enveloppe
+          content:
+            application/json:
+              examples:
+                Success:
+                  value:
+                    enveloppes:
+                      id: 1
+                      name: Main
+                      initialAmount: 1000
+                      parent: null
+                      operationAmount: 0
+        '404':
+          description: Enveloppe not found
+        '500':
+          description: Internal server Error
+      tags:
+        - One enveloppe operation
+    put:
+      summary: Update enveloppe informations
+      description: update enveloppe informations based on thier id
+      operationId: update_one_enveloppe
+      parameters:
+        - in: path
+          name: enveloppeId
+          schema:
+            type: integer
+          required: true
+          description: Numeric value of an enveloppe ID
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/enveloppe'
+      responses:
+        '200':
+          description: enveloppe sucessfully updated
+          content:
+            application/json:
+              examples:
+                Success:
+                  value:
+                    enveloppes:
+                      id: 1
+                      name: Main
+                      initialAmount: 1000
+                      parent: 2
+                      operationAmount: 0
+        '404':
+          description: Enveloppe not found
+        '500':
+          description: Internal server Error
+      tags:
+        - One enveloppe operation
+    delete:
+      summary: Delete one enveloppe
+      description: Delete enveloppe based on their id
+      operationId: delete_one_enveloppe
+      parameters:
+        - in: path
+          name: enveloppeId
+          schema:
+            type: integer
+          required: true
+          description: Numeric value of an enveloppe ID
+      responses:
+        '204':
+          description: Successfully delete the enveloppe
+        '404':
+          description: Enveloppe not found
+        '500':
+          description: Internal server Error
+      tags:
+        - One enveloppe operation
+  /enveloppes/{enveloppeId}/details:
+    summary: Enveloppe details
+    description: 'Manage all details for one enveloppe selected by their ID '
+    get:
+      summary: View all details of one enveloppe
+      description: view all details for one enveloppe selected by their id
+      operationId: get_enveloppe_operation
+      parameters:
+        - in: path
+          name: enveloppeId
+          schema:
+            type: integer
+          required: true
+          description: Numeric value of enveloppe ID
+      responses:
+        '200':
+          description: Successfully get the enveloppe operations
+          content:
+            application/json:
+              examples:
+                Success:
+                  value:
+                    enveloppes:
+                      id: 3
+                      name: hobbies
+                      initialAmount: 300
+                      parent: 1
+                      operationAmount: 60
+                      operations:
+                        - id: 1
+                          name: books
+                          description: buy new books
+                          amount: 35
+                          spendDate:
+                            year: 2023
+                            month: 01
+                            day: 01
+                        - id: 2
+                          name: Video games
+                          description: buy video games
+                          amount: 25
+                          spendDate:
+                            year: 2023
+                            month: 01
+                            day: 01
+        '404':
+          description: Enveloppe not found
+        '500':
+          description: Internal server Error
+      tags:
+        - Enveloppe details
+    post:
+      summary: Add new operation on enveloppe
+      description: add operation on enveloppe selected by id
+      operationId: update_enveloppe_operation
+      parameters:
+        - in: path
+          name: enveloppeId
+          schema:
+            type: integer
+          required: true
+          description: Numeric value of enveloppe ID
+      responses:
+        '201':
+            description: Operations successfully created
+            content:
+              application/json:
+                examples:
+                  Success:
+                    value:
+                      enveloppes:
+                        id: 3
+                        name: hobbies
+                        initialAmount: 300
+                        parent: 1
+                        operationAmount: 60
+                        operations:
+                          - id: 1
+                            name: books
+                            description: buy new books
+                            amount: 35
+                            spendDate:
+                              year: 2023
+                              month: 01
+                              day: 01
+        '404':
+          description: Enveloppe not found
+        '500':
+          description: Internal server Error
+      tags:
+        - Operation Management
+  /enveloppes/{enveloppeId}/details/{operationId}:
+    summary: Manage one operation in particular
+    description: Manage one operation in particular
+    parameters:
+      - in: path
+        name: enveloppeId
+        schema:
+          type: integer
+        required: true
+        description: Numeric value of enveloppe ID
+      - in: path
+        name: operationId
+        schema:
+          type: integer
+        required: true
+        description: Numeric value of operation ID
+    put:
+      summary: Update one operation
+      description: Update one operation based on their Id
+      operationId: update_one_operation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/operation'
+      responses:
+        '200':
+          description: Successfully change enveloppe informations
+          content:
+            application/json:
+              examples:
+                Success:
+                  value:
+                    enveloppes:
+                      id: 3
+                      name: hobbies
+                      initialAmount: 300
+                      parent: 1
+                      operationAmount: 60
+                      operations:
+                        - id: 1
+                          name: books
+                          description: buy new books
+                          amount: 35
+                          spendDate:
+                            year: 2023
+                            month: 01
+                            day: 01
+        '404':
+          description: Enveloppe or operation not found
+        '500':
+          description: Internal server Error
+      tags:
+        - Operation Management
+    delete:
+      summary: Delete one operation
+      description: Delete one operation based on their Id
+      operationId: delete_one_operation
+      responses:
+        '204':
+          description: Successfully delete operation
+          content:
+            application/json:
+              examples:
+                Success:
+                  value: ''
+        '404':
+          description: Enveloppe or operation not found
+        '500':
+          description: Internal server Error
+      tags:
+        - Operation Management
+components:
+  schemas:
+    enveloppe:
+      type: object
+      properties:
+        name:
+          type: string
+        initialAmount:
+          type: integer
+        parent: 
+          type: integer
+    operation:
+      type: object
+      properties:
+        enveloppeID:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        amount:
+          type: integer
+        spendDate:
+          type: object
+          properties:
+            year:
+              type: integer
+            month:
+              type: integer
+            day:
+              type: integer

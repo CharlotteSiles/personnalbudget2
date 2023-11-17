@@ -3,12 +3,17 @@ const { Enveloppe } = require('./model');
 const enveloppes = {
 	async getAllEnveloppes() {
 		const allEnveloppes =  await Enveloppe.findAll();
-		
+		const responseJSON = {
+			enveloppes: []
+		}
+
 		for (let i = 0; i < allEnveloppes.length; i++) {
 			responseJSON.enveloppes[i] = {
 				id: allEnveloppes[i].id,
 				name: allEnveloppes[i].name,
-				amount: allEnveloppes[i].initialAmount - allEnveloppes[i].operationAmount,
+				initialAmount: allEnveloppes[i].initialAmount,
+				childAmount: allEnveloppes[i].childAmount,
+				operationAmount: allEnveloppes[i].operationAmount,
 				parent: allEnveloppes[i].parent
 			}
 		}
@@ -21,7 +26,9 @@ const enveloppes = {
 		const responseJSON = {
 			id: enveloppe.id,
 			name: enveloppe.name,
-			amount: enveloppe.initialAmount - enveloppe.operationAmount,
+			initialAmount: enveloppe.initialAmount,
+			childAmount: enveloppe.childAmount,
+			operationAmount: enveloppe.operationAmount,
 			parent: enveloppe.parent
 		}
 		return responseJSON;
@@ -31,45 +38,53 @@ const enveloppes = {
 		const enveloppeToCreate = enveloppe
 		const parentEnveloppe = await Enveloppe.findOne({ where: { id: enveloppeToCreate.parent } });
 
-		if (parentEnveloppe.operationAmount) {
-			parentEnveloppe.operationAmount -= enveloppeToCreate.initialAmount
-		} else {
-			parentEnveloppe.operationAmount = enveloppeToCreate.initialAmount
+		if (parentEnveloppe) {
+			if (parentEnveloppe.childAmount){
+				parentEnveloppe.childAmount -= enveloppeToCreate.initialAmount
+			} else {
+				parentEnveloppe.childAmount = enveloppeToCreate.initialAmount
+			}
+
+			parentEnveloppe.save()
 		}
-		parentEnveloppe.save()
+		
 
 		const createdEnveloppe = await Enveloppe.create({
 			name: enveloppeToCreate.name,
 			initialAmount: enveloppeToCreate.initialAmount,
 			operationAmount: 0,
+			childAmount: 0,
 			parent: enveloppeToCreate.parent ? enveloppeToCreate.parent : 0
 		});
 
 		return {
 			id: createdEnveloppe.id,
 			name: createdEnveloppe.name,
-			amount: createdEnveloppe.initialAmount - createdEnveloppe.operationAmount,
+			initialAmount: createdEnveloppe.initialAmount,
+			operationAmount: createdEnveloppe.operationAmount,
 			parent: createdEnveloppe.parent
 		}
 	},
 
 	async updateEnveloppe(enveloppeId, enveloppe) {
 
-		const enveloppeToUpdate = Enveloppe.findOne({ where: { id: enveloppeId } });
+		const enveloppeToUpdate = await Enveloppe.findOne({ where: { id: enveloppeId } });
 
 		if (enveloppeToUpdate) {
 
 			if (enveloppeToUpdate.parent > 0 && enveloppeToUpdate.initialAmount != enveloppe.initialAmount) {
 				const parentEnveloppe = await Enveloppe.findOne({ where: { id: enveloppeToUpdate.parent } })
-
-				if (enveloppeToUpdate.parent != enveloppe.parent) {
-					parentEnveloppe.operationAmount += enveloppeToUpdate.initialAmount
-					const newParent = await Enveloppe.findOne({where: {id: enveloppe.parent}})
-					newParent.operationAmount -= enveloppe.initialAmount
-					newParent.save()
+				console.log(enveloppe.parent)
+				if (enveloppe.parent) {
+					if (enveloppeToUpdate.parent != enveloppe.parent) {
+						parentEnveloppe.childAmount += enveloppeToUpdate.initialAmount
+						const newParent = await Enveloppe.findOne({where: {id: enveloppe.parent}})
+						newParent.childAmount -= enveloppe.initialAmount
+						newParent.save()
+					}
 
 				} else {
-					parentEnveloppe += enveloppeToUpdate.initialAmount - enveloppe.initialAmount
+					parentEnveloppe.childAmount += enveloppe.initialAmount - enveloppeToUpdate.initialAmount
 				}
 				parentEnveloppe.save()
 			}
@@ -87,7 +102,7 @@ const enveloppes = {
 			return { 
 				id: enveloppeId, 
 				name: enveloppe.name, 
-				amount: enveloppe.initialAmount - enveloppeToUpdate.operationAmount, 
+				initialAmount: enveloppe.initialAmount, 
 				parent: enveloppe.parent
 			};
 			
@@ -100,7 +115,7 @@ const enveloppes = {
 
 		if (enveloppeToDelete.parent != 0) {
 			const parentEnveloppe = await Enveloppe.findOne({ where: { id: enveloppeToDelete.parent }});
-			parentEnveloppe.operationAmount += enveloppeToDelete.initialAmount
+			parentEnveloppe.childAmount -= enveloppeToDelete.initialAmount
 			parentEnveloppe.save()
 		}
 		

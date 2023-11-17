@@ -1,4 +1,4 @@
-const { Sequelize, DataTypes } = require('sequelize');
+const { Sequelize, DataTypes, Model } = require('sequelize');
 const { config } = require('../config')
 
 const sequelize = new Sequelize(`postgres://${config.db.username}:${config.db.password}@${config.db.server}:${config.db.port}/${config.db.dbName}`)
@@ -11,6 +11,7 @@ const Enveloppe = sequelize.define('Enveloppe', {
 	},
 	name: DataTypes.STRING,
 	operationAmount: DataTypes.FLOAT,
+	childAmount: DataTypes.FLOAT,
 	parent: DataTypes.INTEGER,
 	initialAmount: DataTypes.FLOAT
 });
@@ -28,7 +29,7 @@ const Operation = sequelize.define('Operation', {
 	enveloppeId: DataTypes.INTEGER
 });
 
-sequelize.sync({ force: true });
+//sequelize.sync({ force: true });
 
 module.exports = {
 	Enveloppe,

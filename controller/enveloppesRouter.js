@@ -2,6 +2,7 @@ const express = require('express');
 const enveloppesRouter = express.Router();
 const { enveloppes } = require('../model/enveloppes')
 const { operations } = require('../model/operations')
+const { dataValidation } = require('./dataValidation')
 
 enveloppesRouter.get('/', async (req, res) => {
 	
@@ -12,7 +13,12 @@ enveloppesRouter.get('/', async (req, res) => {
 });
 
 enveloppesRouter.post('/', async (req, res) => {
-	const { name, initialAmount, parent } = req.body
+	let { name, initialAmount, parent } = req.body
+	
+	name = dataValidation.validName(name)
+	initialAmount = dataValidation.validInitialAmount(initialAmount)
+	parent = dataValidation.validParent(parent)
+
 	const createdEnveloppe = await enveloppes.createEnveloppe({ 
 		name, 
 		initialAmount,
@@ -23,17 +29,18 @@ enveloppesRouter.post('/', async (req, res) => {
 		res.status(201).send(JSON.stringify({ 
 			id: createdEnveloppe.id, 
 			name: createdEnveloppe.name, 
-			amount: createdEnveloppe.initialAmount
+			initialAmount: createdEnveloppe.initialAmount,
+			parent: createdEnveloppe.parent
 		}));
 	} else {
-		res.status(400).send('Bad request. You need to send JSON { "name": "stringName", "amount": "numberAmount" }');
+		res.status(400).send('Bad request. You need to send JSON { "name": "stringName", "initialAmount": "numberAmount", "parent": "parent" }');
 	}
 });
 
 enveloppesRouter.get('/:enveloppeId', async (req, res) => {
-	const enveloppeId = Number(req.params.enveloppeId);
+	const enveloppeId = dataValidation.validId(req.params.enveloppeId);
 
-	if (Number.isInteger(enveloppeId) && enveloppeId > 0) {
+	if (enveloppeId) {
 		const oneEnveloppe = await enveloppes.getEnveloppeById(enveloppeId);
 		
 		res.status(200).send(JSON.stringify(oneEnveloppe));
@@ -43,15 +50,15 @@ enveloppesRouter.get('/:enveloppeId', async (req, res) => {
 });
 
 enveloppesRouter.put('/:enveloppeId', async (req, res) => {
-	const enveloppeId = Number(req.params.enveloppeId);
+	const enveloppeId = dataValidation.validId(req.params.enveloppeId);
 
-	if (Number.isInteger(enveloppeId) && enveloppeId > 0) {
+	if (enveloppeId) {
 		const { name, initialAmount, parent } = req.body
 		const updatedEnveloppe = await enveloppes.updateEnveloppe(enveloppeId, { name: name, initialAmount: initialAmount, parent: parent })
 		if (updatedEnveloppe) {
 			res.status(201).send(JSON.stringify(updatedEnveloppe));
 		} else {
-			res.status(400).send('Bad request. You need to send JSON { "name": "stringName", "amount": "numberAmount" }');
+			res.status(400).send('Bad request. You need to send JSON { "name": "stringName", "initialAmount": "numberAmount", "parent": "parent" }');
 		}
 	} else {
 		res.status(400).send('Bad request. The enveloppe id have to be a number greater than 0 in request url : \'/enveloppes/enveloppeId\'');
@@ -59,9 +66,9 @@ enveloppesRouter.put('/:enveloppeId', async (req, res) => {
 });
 
 enveloppesRouter.delete('/:enveloppeId', async (req, res) => {
-	const enveloppeId = Number(req.params.enveloppeId);
+	const enveloppeId = dataValidation.validId(req.params.enveloppeId);
 
-	if (Number.isInteger(enveloppeId) && enveloppeId > 0) {
+	if (enveloppeId) {
 		const oneEnveloppe = await enveloppes.deleteEnveloppe(enveloppeId);
 
 		res.status(204).send(JSON.stringify('No content. Enveloppe successfully deleted'));
@@ -72,8 +79,9 @@ enveloppesRouter.delete('/:enveloppeId', async (req, res) => {
 
 // to review : 
 enveloppesRouter.get('/:enveloppeId/operations', async (req, res) => {
-	const enveloppeId = Number(req.params.enveloppeId);
-	if (Number.isInteger(enveloppeId) && enveloppeId > 0) {
+	const enveloppeId = dataValidation.validId(req.params.enveloppeId);
+	
+	if (enveloppeId) {
 		const oneEnveloppe = await enveloppes.getEnveloppeById(enveloppeId);
 		const enveloppeOperations = await operations.getOperations(enveloppeId)
 
@@ -84,16 +92,26 @@ enveloppesRouter.get('/:enveloppeId/operations', async (req, res) => {
 			operations: {}
 		}
 		
-		res.status(200).send(JSON.stringify());
+		res.status(200).send(JSON.stringify(responseJSON));
 	} else {
 		res.status(400).send('Bad request. The enveloppe id have to be a number greater than 0 in request url : \'/enveloppes/enveloppeId\'');
 	}
 });
 
 enveloppesRouter.post('/:enveloppeId/operations', async (req, res) => {
-	const { name, description, amount, spendDate } = req.body
-	const enveloppeId = req.params.enveloppeId
-
+	let { name, description, amount, spendDate } = req.body
+	
+	name = dataValidation.validName(name)
+	description = dataValidation.validDescription(description)
+	amount = dataValidation.validInitialAmount(amount)
+	spendDate = dataValidation.validSpendDate(spendDate)
+	
+	const enveloppeId = dataValidation.validId(req.params.enveloppeId);
+	
+	if (!enveloppeId || !name || !description || !amount || !spendDate) {
+		res.status(400).send('Bad request')
+	}
+	
 	const newOperation = await operations.createOperation({
 		name,
 		description,
@@ -101,13 +119,14 @@ enveloppesRouter.post('/:enveloppeId/operations', async (req, res) => {
 		spendDate,
 		enveloppeId
 	});
+	
 
 	res.status(201).send(JSON.stringify({
 		id: newOperation.id,
 		name: newOperation.name,
 		description: newOperation.description,
 		amount: newOperation.amount,
-		spendDate: newOperation.spendDate
+		spendDate: newOperation.spendDate.toString()
 	}))
 });
 
