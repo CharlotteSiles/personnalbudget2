@@ -29,7 +29,7 @@ const Operation = sequelize.define('Operation', {
 	enveloppeId: DataTypes.INTEGER
 });
 
-//sequelize.sync({ force: true });
+sequelize.sync();
 
 module.exports = {
 	Enveloppe,
